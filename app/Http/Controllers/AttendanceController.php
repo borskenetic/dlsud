@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Book;
+use App\Models\BookLog;
 use App\Models\LibraryAttendanceSetting;
 use App\Models\LibraryStudent;
 use App\Models\Setting;
@@ -49,11 +51,18 @@ class AttendanceController extends Controller
     {
         $request->validate(['qrcode' => 'required|string']);
 
-        $resolved = $scanner->resolve($request->qrcode);
+        $token = trim(str_replace("\r", '', (string) $request->qrcode));
+        $resolved = $scanner->resolve($token, qrcodeOnly: true);
         $student = $resolved['student'];
         $employee = $resolved['employee'];
 
         if (! $student && ! $employee) {
+            $bookResponse = $this->bookGateResponse($token);
+
+            if ($bookResponse) {
+                return $bookResponse;
+            }
+
             return response()->json([
                 'type' => 'error',
                 'message' => 'RFID not recognized.',
@@ -93,6 +102,40 @@ class AttendanceController extends Controller
             'logout_feedback_enabled' => $this->libraryFeedbackEnabled(),
             'log' => [
                 'scanned_at' => $result['log']->scanned_at->format('Y-m-d h:i:s A'),
+            ],
+        ]);
+    }
+
+    /**
+     * Gate check for a book RFID. An unchecked-out copy tells the kiosk to alarm.
+     */
+    private function bookGateResponse(string $token): ?JsonResponse
+    {
+        if ($token === '') {
+            return null;
+        }
+
+        $book = Book::query()
+            ->whereNull('archived_at')
+            ->where('rfid', $token)
+            ->first();
+
+        if (! $book) {
+            return null;
+        }
+
+        $lastLog = BookLog::query()
+            ->where('book_id', $book->id)
+            ->latest()
+            ->first();
+
+        $checkedOut = $lastLog && $lastLog->status === 'Checked Out';
+
+        return response()->json([
+            'type' => 'book',
+            'bookStatus' => $checkedOut ? 'Checked Out' : 'Not Checked Out',
+            'book' => [
+                'title_statement' => $book->title_statement ?: 'Untitled',
             ],
         ]);
     }

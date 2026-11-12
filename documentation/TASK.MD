@@ -65,6 +65,7 @@ Reference plan:
 - [x] Align Super Admin navigation with active module switching.
 - [x] Implement workflow-grouped sidebar navigation and role-specific dashboard pages.
 - [x] Add richer demo workflow seed data for manual testing.
+- [x] Attendance kiosk matches library student and employee `qrcode` values, and book `rfid` values. An RFID whose latest circulation log is not Checked Out returns `Not Checked Out` so the kiosk plays the alarm. USM normalized-name QR parsing is not used.
 
 ## Confirmed Decisions
 
@@ -514,7 +515,7 @@ Goal: allow the isolated Developer role to customize the public Attendance and L
 - Dashboard navigation is module-aware: Attendance-only staff no longer see Library navigation, Library-only staff no longer see Attendance navigation, and Super Admin keeps system/module access.
 - Library attendance now has its own public scanner, feedback endpoint, admin logs, reports, and feedback settings, all backed by `library_attendance_*` tables.
 - Library scanner lookup accepts Library patron QR codes and ID numbers only; Attendance-only patrons are rejected by the Library scanner.
-- Official public kiosk `/attendance` now resolves Library patrons and writes `library_attendance_logs` (same visit domain as `/library/attendance/scanner`). Attendance-only patrons are rejected there; school `attendance_logs` remain separate for Attendance admin workflows.
+- Official public kiosk `/attendance` resolves Library patrons by the `qrcode` column and writes `library_attendance_logs`. It does not match ID numbers or normalized names. A scan that matches `library_books.rfid` returns a book gate result: `Not Checked Out` (kiosk alarm) unless the latest book log is `Checked Out`. Barcode and accession numbers are not gate identifiers. Attendance-only patrons are rejected there; school `attendance_logs` remain separate for Attendance admin workflows. The library scanner at `/library/attendance/scanner` still accepts a library QR code or ID number and does not gate books.
 - Role dashboard card/grid CSS originally lived only in Vite-compiled `resources/css/app.css`. `public/build` is gitignored, so deployed dashboards rendered as unstyled stacked text unless `npm run build` had been run on the server. Those styles now load from `public/css/dashboard.css`.
 - Public `/register` previously routed users to a module choice page; `/register/library` kept Library pending registration and `/register/attendance` wrote to Attendance pending registration.
 - Attendance patron approval moves records from `attendance_pending_*` tables into `attendance_*` patron tables and writes module-aware activity logs.

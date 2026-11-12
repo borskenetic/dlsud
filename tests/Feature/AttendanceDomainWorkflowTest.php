@@ -6,6 +6,8 @@ namespace Tests\Feature;
 
 use App\Models\AttendanceLog;
 use App\Models\AttendanceStudent;
+use App\Models\Book;
+use App\Models\BookLog;
 use App\Models\Employee;
 use App\Models\Student;
 use App\Models\User;
@@ -50,7 +52,7 @@ class AttendanceDomainWorkflowTest extends TestCase
         $this->assertDatabaseCount('attendance_logs', 0);
     }
 
-    public function test_official_kiosk_scan_accepts_library_student_id_number(): void
+    public function test_official_kiosk_scan_uses_student_qrcode_not_id_or_normalized_name(): void
     {
         $student = Student::query()->create([
             'id_number' => '24-19462',
@@ -58,17 +60,38 @@ class AttendanceDomainWorkflowTest extends TestCase
             'lastname' => 'Aba',
             'qrcode' => 'S-LIB-19462',
         ]);
+        $student->forceFill(['normalized_name' => 'FATMAABA'])->save();
 
         $this->postJson('/attendance', [
             'qrcode' => '24-19462',
         ])
             ->assertOk()
+            ->assertJsonPath('type', 'error');
+
+        $this->postJson('/attendance', [
+            'qrcode' => "24-19462\nFatma Aba",
+        ])
+            ->assertOk()
+            ->assertJsonPath('type', 'error');
+
+        $this->postJson('/attendance', [
+            'qrcode' => 'FATMAABA',
+        ])
+            ->assertOk()
+            ->assertJsonPath('type', 'error');
+
+        $this->postJson('/attendance', [
+            'qrcode' => 'S-LIB-19462',
+        ])
+            ->assertOk()
             ->assertJsonPath('type', 'student')
             ->assertJsonPath('student_id', $student->id)
             ->assertJsonPath('status', 'IN');
+
+        $this->assertDatabaseCount('library_attendance_logs', 1);
     }
 
-    public function test_official_kiosk_scan_accepts_library_employee_id(): void
+    public function test_official_kiosk_scan_uses_employee_qrcode(): void
     {
         $employee = Employee::query()->create([
             'employee_id' => 'EMP-0007',
@@ -76,9 +99,16 @@ class AttendanceDomainWorkflowTest extends TestCase
             'lastname' => 'Hopper',
             'qrcode' => 'E-LIB-0007',
         ]);
+        $employee->forceFill(['normalized_name' => 'GRACEHOPPER'])->save();
 
         $this->postJson('/attendance', [
             'qrcode' => 'EMP-0007',
+        ])
+            ->assertOk()
+            ->assertJsonPath('type', 'error');
+
+        $this->postJson('/attendance', [
+            'qrcode' => 'E-LIB-0007',
         ])
             ->assertOk()
             ->assertJsonPath('type', 'employee')
@@ -109,6 +139,63 @@ class AttendanceDomainWorkflowTest extends TestCase
 
         $this->assertDatabaseCount('library_attendance_logs', 0);
         $this->assertDatabaseCount('attendance_logs', 0);
+    }
+
+    public function test_official_kiosk_alarms_when_book_rfid_is_not_checked_out(): void
+    {
+        $onShelf = Book::query()->create([
+            'title_statement' => 'On the shelf',
+            'rfid' => 'RFID-SHELF',
+            'barcode' => 'BC-SHELF',
+            'accession_no' => 'ACC-SHELF',
+        ]);
+        $returned = Book::query()->create([
+            'title_statement' => 'Already returned',
+            'rfid' => 'RFID-RETURNED',
+        ]);
+        BookLog::query()->create([
+            'book_id' => $returned->id,
+            'status' => 'Checked In',
+            'circulation_type' => BookLog::CIRCULATION_CHECKOUT,
+        ]);
+        $borrowed = Book::query()->create([
+            'title_statement' => 'Borrowed copy',
+            'rfid' => 'RFID-OUT',
+        ]);
+        BookLog::query()->create([
+            'book_id' => $borrowed->id,
+            'status' => 'Checked Out',
+            'circulation_type' => BookLog::CIRCULATION_CHECKOUT,
+        ]);
+
+        $this->postJson('/attendance', ['qrcode' => 'RFID-SHELF'])
+            ->assertOk()
+            ->assertJsonPath('type', 'book')
+            ->assertJsonPath('bookStatus', 'Not Checked Out')
+            ->assertJsonPath('book.title_statement', 'On the shelf');
+
+        $this->postJson('/attendance', ['qrcode' => 'RFID-RETURNED'])
+            ->assertOk()
+            ->assertJsonPath('type', 'book')
+            ->assertJsonPath('bookStatus', 'Not Checked Out')
+            ->assertJsonPath('book.title_statement', 'Already returned');
+
+        $this->postJson('/attendance', ['qrcode' => 'RFID-OUT'])
+            ->assertOk()
+            ->assertJsonPath('type', 'book')
+            ->assertJsonPath('bookStatus', 'Checked Out')
+            ->assertJsonPath('book.title_statement', 'Borrowed copy');
+
+        $this->postJson('/attendance', ['qrcode' => 'BC-SHELF'])
+            ->assertOk()
+            ->assertJsonPath('type', 'error');
+
+        $this->postJson('/attendance', ['qrcode' => 'ACC-SHELF'])
+            ->assertOk()
+            ->assertJsonPath('type', 'error');
+
+        $this->assertDatabaseCount('library_attendance_logs', 0);
+        $this->assertSame($onShelf->id, Book::query()->where('rfid', 'RFID-SHELF')->value('id'));
     }
 
     public function test_attendance_admin_can_view_daily_student_absences(): void

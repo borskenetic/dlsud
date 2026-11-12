@@ -10,51 +10,37 @@ use Carbon\Carbon;
 class LibraryVisitScanService
 {
     /**
-     * Resolve a Library patron by QR code or ID number.
+     * Resolve a Library patron.
+     *
+     * The attendance kiosk matches the stored `qrcode` only. The library
+     * scanner also accepts an ID number. Name-normalized USM QR payloads
+     * are not used.
      *
      * @return array{student: ?LibraryStudent, employee: ?LibraryEmployee}
      */
-    public function resolve(string $rawToken): array
+    public function resolve(string $rawToken, bool $qrcodeOnly = false): array
     {
         $token = trim(str_replace("\r", '', $rawToken));
 
         $student = LibraryStudent::query()
-            ->where(function ($query) use ($token) {
-                $query->where('qrcode', $token)
-                    ->orWhere('id_number', $token);
+            ->where(function ($query) use ($token, $qrcodeOnly) {
+                $query->where('qrcode', $token);
+
+                if (! $qrcodeOnly) {
+                    $query->orWhere('id_number', $token);
+                }
             })
             ->first();
 
         $employee = $student ? null : LibraryEmployee::query()
-            ->where(function ($query) use ($token) {
-                $query->where('qrcode', $token)
-                    ->orWhere('employee_id', $token);
+            ->where(function ($query) use ($token, $qrcodeOnly) {
+                $query->where('qrcode', $token);
+
+                if (! $qrcodeOnly) {
+                    $query->orWhere('employee_id', $token);
+                }
             })
             ->first();
-
-        if (! $student && ! $employee) {
-            $parsed = $this->parseLegacyQr($rawToken);
-
-            if ($parsed['student_no']) {
-                $student = LibraryStudent::query()
-                    ->where('id_number', $parsed['student_no'])
-                    ->first();
-            }
-
-            if (! $student && $parsed['full_name']) {
-                $normalized = $this->normalizeName($parsed['full_name']);
-
-                $student = LibraryStudent::query()
-                    ->where('normalized_name', $normalized)
-                    ->first();
-
-                if (! $student) {
-                    $employee = LibraryEmployee::query()
-                        ->where('normalized_name', $normalized)
-                        ->first();
-                }
-            }
-        }
 
         return [
             'student' => $student,
@@ -96,48 +82,5 @@ class LibraryVisitScanService
             'student' => $student,
             'employee' => $employee,
         ];
-    }
-
-    /**
-     * @return array{student_no: ?string, full_name: ?string, course: ?string}
-     */
-    private function parseLegacyQr(string $raw): array
-    {
-        $raw = trim(str_replace("\r", '', $raw));
-
-        if (str_contains($raw, "\n")) {
-            $lines = array_values(array_filter(array_map('trim', explode("\n", $raw))));
-
-            return [
-                'student_no' => $lines[0] ?? null,
-                'full_name' => $lines[1] ?? null,
-                'course' => $lines[2] ?? null,
-            ];
-        }
-
-        $parts = array_map('trim', explode(',', $raw));
-
-        if (preg_match('/^\d{2}-\d+$/', $parts[0] ?? '')) {
-            return [
-                'student_no' => $parts[0] ?? null,
-                'full_name' => $parts[1] ?? null,
-                'course' => $parts[2] ?? null,
-            ];
-        }
-
-        return [
-            'student_no' => null,
-            'full_name' => $parts[0] ?? null,
-            'course' => $parts[1] ?? null,
-        ];
-    }
-
-    private function normalizeName(string $fullName): string
-    {
-        $name = strtoupper($fullName);
-        $name = preg_replace('/[^A-Z\s]/', '', $name) ?? '';
-        $name = preg_replace('/\b[A-Z]\b/', '', $name) ?? '';
-
-        return preg_replace('/\s+/', '', $name) ?? '';
     }
 }
