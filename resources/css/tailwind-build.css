@@ -1,0 +1,33 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+/* DLSU-D header and footer contrast */
+.navbar--hero {
+    background-color: #007041;
+}
+.navbar .university-name,
+.navbar .nav-links a {
+    color: #ffffff;
+}
+.navbar .nav-links a:hover {
+    color: #D8F3E4;
+}
+.navbar .login-button {
+    background-color: #ffffff;
+    color: #007041 !important;
+}
+.navbar .login-button:hover {
+    background-color: #E8F5EE;
+    color: #00482A !important;
+}
+.footer-university-name,
+.footer-tagline,
+.footer-tagline a,
+.footer-copyright {
+    color: #ffffff;
+}
+.site-footer {
+    border-top-color: #00482A;
+}

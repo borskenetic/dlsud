@@ -1,0 +1,94 @@
+:root {
+  /*
+   * Primary brand tokens (edit these per school)
+   */
+  --brand-primary: #007041;
+  --brand-accent: #007041;
+  --brand-text-dark: #333;
+  --brand-text-light: #fff;
+
+  /*
+   * App-wide branding tokens (staff + kiosk)
+   */
+  --brand-page-bg: #ffffff;
+  --brand-school-name-color: #007041;
+
+  --brand-nav-link: #007041;
+  --brand-nav-link-active: #ffffff;
+  --brand-nav-hover-bg: #ffffff;
+  --brand-nav-hover-text: #148a32;
+
+  --brand-logout-bg: #007041;
+  --brand-logout-text: #ffffff;
+
+  --brand-button-bg: #007041;
+  --brand-button-text: #ffffff;
+  --brand-button-hover-bg: #00482A;
+  --brand-button-hover-text: #ffffff;
+
+  --brand-danger-bg: #9b2335;
+  --brand-danger-hover-bg: #7a1c2a;
+  --brand-danger-text: #ffffff;
+
+  --brand-success-bg: #148a32;
+  --brand-success-hover-bg: #0f6b26;
+  --brand-success-text: #ffffff;
+
+  --brand-footer-bg: #007041;
+
+  --brand-kiosk-gradient-from: #007041;
+  --brand-kiosk-gradient-to: #148a32;
+
+  /*
+   * Backwards-compatible vars used by your existing landing `style.css`
+   */
+  --primary-yellow: var(--brand-primary);
+  --secondary-green: var(--brand-accent);
+  --text-dark: var(--brand-text-dark);
+  --text-light: var(--brand-text-light);
+}
+
+/*
+ * Bootstrap theme variables (affects `.btn-primary`, etc.)
+ * Put this AFTER bootstrap.min.css in your layouts.
+ */
+:root {
+  --bs-primary: #007041;
+  --bs-primary-rgb: 0, 112, 65;
+
+  --bs-success: #148a32;
+  --bs-success-rgb: 20, 138, 50;
+
+  --bs-link-color: #007041;
+  --bs-link-hover-color: #00482A;
+}
+
+
+/* DLSU-D header and footer contrast */
+.navbar--hero {
+    background-color: #007041;
+}
+.navbar .university-name,
+.navbar .nav-links a {
+    color: #ffffff;
+}
+.navbar .nav-links a:hover {
+    color: #D8F3E4;
+}
+.navbar .login-button {
+    background-color: #ffffff;
+    color: #007041 !important;
+}
+.navbar .login-button:hover {
+    background-color: #E8F5EE;
+    color: #00482A !important;
+}
+.footer-university-name,
+.footer-tagline,
+.footer-tagline a,
+.footer-copyright {
+    color: #ffffff;
+}
+.site-footer {
+    border-top-color: #00482A;
+}
