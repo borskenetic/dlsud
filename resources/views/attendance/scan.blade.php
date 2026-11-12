@@ -205,12 +205,17 @@
         isCooldown = true;
         setTimeout(() => { isCooldown = false; }, 100);
 
+        const code = input.value.trim().replace(/\r/g, '');
+        input.value = '';
+        if (!code) return;
+
         const formData = new FormData();
-        formData.append('qrcode', input.value.trim().replace(/\r/g, ''));
+        formData.append('qrcode', code);
         formData.append('_token', '{{ csrf_token() }}');
 
         fetch("{{ route('attendance.process') }}", {
           method: 'POST',
+          headers: { 'Accept': 'application/json' },
           body: formData
         })
           .then(res => res.json())
@@ -258,20 +263,29 @@
               `;
               sidebar.appendChild(div);
               scheduleClear(2000);
-            } else if (data.type === 'error') {
+            } else {
               const div = document.createElement('div');
               div.classList.add('name-box');
               div.innerHTML = `
-                <div class="student-name">${data.message}</div>
+                <div class="student-name">${data.type === 'error' && data.message ? data.message : 'Not Recognized'}</div>
                 <div class="label">Error</div>
               `;
               sidebar.appendChild(div);
               scheduleClear(2000);
             }
 
-            input.value = '';
           })
-          .catch(err => console.error(err));
+          .catch(() => {
+            clearDisplay();
+            const div = document.createElement('div');
+            div.classList.add('name-box');
+            div.innerHTML = `
+              <div class="student-name">Not Recognized</div>
+              <div class="label">Error</div>
+            `;
+            sidebar.appendChild(div);
+            scheduleClear(2000);
+          });
       });
 
       function updateDateTime() {

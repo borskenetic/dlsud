@@ -1,16 +1,21 @@
 @extends('layouts.sidebar')
 
+@section('title', 'Register Faculty & Staff')
+
 @section('styles')
-    <link rel="stylesheet" href="{{ asset('css/students/create.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/students/patron-form.css') }}?v=1">
 @endsection
 
 @section('content')
-<div class="container mt-5 mb-5">
-    <div class="card">
-        <div class="card-header text-center">
-            <h4 class="mb-0">Register New Faculty &amp; Staff</h4>
+<div class="patron-form">
+    <div class="patron-form__hero">
+        <div>
+            <p class="patron-form__kicker">Library patrons</p>
+            <h1>Register faculty &amp; staff</h1>
+            <p class="patron-form__lead">Add a faculty or staff patron for circulation and library attendance.</p>
         </div>
-        <div class="card-body">
+        <a href="{{ route('employees.index') }}" class="btn btn-quiet">Back to faculty</a>
+    </div>
 
             @if(session('error'))
                 <div class="alert alert-danger">{{ session('error') }}</div>
@@ -28,7 +33,8 @@
             <form id="employeeForm" action="{{ route('employees.store') }}" method="POST" enctype="multipart/form-data">
                 @csrf
 
-                <h5 class="mb-3">Faculty &amp; Staff Information</h5>
+                <section class="patron-section">
+                <h2>Faculty &amp; staff information</h2>
                 <div class="row g-3">
                     <div class="col-md-6">
                         <label class="form-label">First Name</label>
@@ -90,14 +96,15 @@
                     </div>
                     <div class="col-12">
                         <label class="form-label">Signature (draw below)</label>
-                        <canvas id="employeeSignaturePad" width="500" height="150"></canvas>
+                        <canvas id="employeeSignaturePad" class="patron-signature" width="500" height="150"></canvas>
                         <input type="hidden" name="employee_signature" id="employeeSignatureInput" value="{{ old('employee_signature') }}">
                         <button type="button" id="clearEmployeeSignature" class="btn btn-outline-danger btn-sm mt-2">Clear</button>
                     </div>
                 </div>
+                </section>
 
-                <hr class="my-4">
-                <h5 class="mb-3">Emergency Contact Information</h5>
+                <section class="patron-section">
+                <h2>Emergency contact</h2>
                 <div class="row g-3">
                     <div class="col-md-6">
                         <label class="form-label">Contact person</label>
@@ -116,14 +123,13 @@
                         <textarea name="emergency_address" class="form-control" rows="2">{{ old('emergency_address') }}</textarea>
                     </div>
                 </div>
+                </section>
 
-                <div class="text-center mt-4">
-                    <button type="submit" class="btn btn-primary px-4">Register Faculty &amp; Staff</button>
-                    <a href="{{ route('employees.index') }}" class="btn btn-secondary px-4">Back</a>
+                <div class="patron-actions">
+                    <a href="{{ route('employees.index') }}" class="btn btn-quiet">Cancel</a>
+                    <button type="submit" class="btn btn-save">Register faculty &amp; staff</button>
                 </div>
             </form>
-        </div>
-    </div>
 </div>
 @endsection
 

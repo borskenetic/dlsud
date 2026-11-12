@@ -13,6 +13,8 @@ use App\Models\Student;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\Client\ConnectionException;
+use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
 
 class AttendanceDomainWorkflowTest extends TestCase
@@ -50,6 +52,34 @@ class AttendanceDomainWorkflowTest extends TestCase
             'status' => 'IN',
         ]);
         $this->assertDatabaseCount('attendance_logs', 0);
+    }
+
+    public function test_official_kiosk_scan_succeeds_when_sms_modem_is_down(): void
+    {
+        Http::fake(function () {
+            throw new ConnectionException('modem down');
+        });
+
+        $student = Student::query()->create([
+            'id_number' => '25-00008',
+            'firstname' => 'Ada',
+            'lastname' => 'Lovelace',
+            'qrcode' => 'S-SMS-0008',
+            'mobile_number' => '09171234567',
+        ]);
+
+        $this->postJson('/attendance', [
+            'qrcode' => 'S-SMS-0008',
+        ])
+            ->assertOk()
+            ->assertJsonPath('type', 'student')
+            ->assertJsonPath('student_id', $student->id)
+            ->assertJsonPath('status', 'IN');
+
+        $this->assertDatabaseHas('library_attendance_logs', [
+            'student_id' => $student->id,
+            'status' => 'IN',
+        ]);
     }
 
     public function test_official_kiosk_scan_uses_student_qrcode_not_id_or_normalized_name(): void
@@ -135,7 +165,7 @@ class AttendanceDomainWorkflowTest extends TestCase
         ])
             ->assertOk()
             ->assertJsonPath('type', 'error')
-            ->assertJsonPath('message', 'RFID not recognized.');
+            ->assertJsonPath('message', 'Not Recognized');
 
         $this->assertDatabaseCount('library_attendance_logs', 0);
         $this->assertDatabaseCount('attendance_logs', 0);

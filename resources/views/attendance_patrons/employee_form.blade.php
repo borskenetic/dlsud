@@ -14,7 +14,7 @@
         <div class="alert alert-danger"><ul class="mb-0">@foreach ($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul></div>
     @endif
 
-    <form id="attendanceEmployeeForm" method="POST" enctype="multipart/form-data" action="{{ $mode === 'create' ? route('attendance.patrons.employees.store') : route('attendance.patrons.employees.update', $employee) }}" class="card border-0 shadow-sm">
+    <form id="attendanceEmployeeForm" method="POST" enctype="multipart/form-data" action="{{ $mode === 'create' ? route('attendance.patrons.employees.store') : route('attendance.patrons.employees.update', $employee) }}" class="patron-form card border-0">
         @csrf
         @if ($mode === 'edit') @method('PUT') @endif
         <div class="card-body">
@@ -70,6 +70,7 @@
 @endsection
 
 @push('styles')
+    <link rel="stylesheet" href="{{ asset('css/students/patron-form.css') }}?v=1">
     <style>
         .attendance-signature-box {
             width: 100%;

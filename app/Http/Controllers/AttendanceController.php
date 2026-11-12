@@ -65,7 +65,7 @@ class AttendanceController extends Controller
 
             return response()->json([
                 'type' => 'error',
-                'message' => 'RFID not recognized.',
+                'message' => 'Not Recognized',
             ]);
         }
 

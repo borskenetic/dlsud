@@ -372,12 +372,18 @@ class SMSController extends Controller
             return false;
         }
 
-        $modemResponse = $this->postToSmsModem([
-            [
-                'number' => $number,
-                'message' => $message,
-            ],
-        ]);
+        try {
+            $modemResponse = $this->postToSmsModem([
+                [
+                    'number' => $number,
+                    'message' => $message,
+                ],
+            ]);
+        } catch (\Throwable $e) {
+            report($e);
+
+            return false;
+        }
 
         return $modemResponse && $modemResponse->successful();
     }

@@ -1,0 +1,190 @@
+.patron-form {
+    max-width: 1040px;
+}
+
+.patron-form__hero {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+}
+
+.patron-form__kicker {
+    margin: 0 0 0.25rem;
+    color: var(--shell-primary, #007041);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.patron-form__hero h1 {
+    margin: 0;
+    color: var(--shell-text, #143028);
+    font-size: 1.65rem;
+    font-weight: 700;
+}
+
+.patron-form__lead {
+    margin: 0.35rem 0 0;
+    max-width: 38rem;
+    color: var(--shell-muted, #5c6f66);
+    font-size: 0.92rem;
+}
+
+.patron-section,
+form.patron-form {
+    background: var(--shell-surface, #fff);
+    color: var(--shell-text, #143028);
+    border: 1px solid var(--shell-border, #d7e6dc);
+    border-radius: 1rem;
+    box-shadow: var(--shell-shadow, 0 8px 24px rgba(20, 48, 40, 0.05));
+}
+
+.patron-section {
+    padding: 1.2rem 1.3rem 1.35rem;
+    margin-bottom: 1rem;
+}
+
+.patron-section h2 {
+    margin: 0 0 1rem;
+    padding-bottom: 0.7rem;
+    border-bottom: 1px solid var(--shell-border, #e4f0e8);
+    color: var(--shell-primary-dark, #00482A);
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+.patron-form .form-label {
+    margin-bottom: 0.35rem;
+    color: var(--shell-muted, #3d5248);
+    font-size: 0.78rem;
+    font-weight: 600;
+}
+
+.patron-form .form-control,
+.patron-form .form-select {
+    min-height: 2.65rem;
+    border-radius: 0.7rem;
+    background: var(--shell-surface, #fbfefc);
+    border-color: var(--shell-border, #c9d9d0);
+}
+
+.patron-form textarea.form-control {
+    min-height: 6rem;
+}
+
+.patron-form .form-control[readonly] {
+    background: var(--shell-surface-muted, #f3f6f4);
+}
+
+.patron-form .form-control:focus,
+.patron-form .form-select:focus {
+    border-color: var(--shell-primary, #007041);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--shell-primary, #007041) 18%, transparent);
+}
+
+.patron-media {
+    display: grid;
+    grid-template-columns: minmax(180px, 240px) 1fr;
+    gap: 1.25rem;
+    align-items: start;
+}
+
+.patron-photo {
+    width: 120px;
+    height: 120px;
+    object-fit: cover;
+    border-radius: 0.9rem;
+    border: 1px solid var(--shell-border, #d7e6dc);
+    background: var(--shell-surface-muted, #f3faf6);
+}
+
+.patron-photo--empty {
+    display: grid;
+    place-items: center;
+    color: var(--shell-subtle, #7d9086);
+    font-size: 0.75rem;
+    text-align: center;
+    padding: 0.5rem;
+}
+
+.patron-signature {
+    display: block;
+    width: 500px;
+    max-width: 100%;
+    height: 150px;
+    border: 1px dashed color-mix(in srgb, var(--shell-primary, #007041) 45%, var(--shell-border, #c9d9d0));
+    border-radius: 0.8rem;
+    background: var(--shell-surface, #fff);
+    touch-action: none;
+}
+
+.patron-signature-preview {
+    max-width: 240px;
+    max-height: 80px;
+    margin-top: 0.75rem;
+    padding: 0.4rem;
+    border: 1px solid var(--shell-border, #d7e6dc);
+    border-radius: 0.7rem;
+    background: var(--shell-surface, #fff);
+    object-fit: contain;
+}
+
+.patron-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 0.6rem;
+    margin-top: 0.25rem;
+}
+
+.patron-form .btn-save {
+    background: var(--shell-primary, #007041);
+    border: 0;
+    border-radius: 0.7rem;
+    color: #fff;
+    font-weight: 600;
+    padding: 0.55rem 1.15rem;
+}
+
+.patron-form .btn-save:hover,
+.patron-form .btn-save:focus {
+    background: var(--shell-primary-dark, #00482A);
+    color: #fff;
+}
+
+.patron-form .btn-quiet {
+    border-radius: 0.7rem;
+    border: 1px solid var(--shell-border, #c9d9d0);
+    background: var(--shell-surface, #fff);
+    color: var(--shell-text, #143028);
+    font-weight: 600;
+    padding: 0.55rem 1.05rem;
+}
+
+.patron-form .btn-quiet:hover {
+    border-color: var(--shell-primary, #007041);
+    color: var(--shell-primary-dark, #00482A);
+}
+
+form.patron-form {
+    overflow: hidden;
+    margin-bottom: 1rem;
+}
+
+form.patron-form .card-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.6rem;
+    background: transparent;
+    border-top: 1px solid var(--shell-border, #e4f0e8);
+}
+
+@media (max-width: 720px) {
+    .patron-media {
+        grid-template-columns: 1fr;
+    }
+}
